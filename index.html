@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎄 Secret Santa Picker</title>
+    <title>🎄 Christmas Friend Picker</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #dc2626 0%, #16a34a 50%, #dc2626 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,607 +23,362 @@
 
         .container {
             background: white;
-            border-radius: 24px;
+            border-radius: 20px;
             padding: 40px;
             max-width: 600px;
             width: 100%;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        .icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 20px;
-            display: block;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         h1 {
             text-align: center;
-            color: #1f2937;
-            margin-bottom: 10px;
+            color: #667eea;
+            margin-bottom: 30px;
             font-size: 2em;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #6b7280;
-            margin-bottom: 30px;
+        .step {
+            display: none;
         }
 
-        input[type="text"] {
+        .step.active {
+            display: block;
+        }
+
+        input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-size: 16px;
             transition: border 0.3s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="number"]:focus {
             outline: none;
-            border-color: #16a34a;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            border-color: #667eea;
         }
 
         button {
-            padding: 14px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #dc2626, #16a34a);
+            background: #667eea;
             color: white;
-            width: 100%;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
         }
 
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        button:hover {
+            background: #5568d3;
         }
 
-        .btn-primary:disabled {
-            opacity: 0.5;
+        button:disabled {
+            background: #ccc;
             cursor: not-allowed;
         }
 
-        .btn-secondary {
-            background: #16a34a;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #15803d;
-        }
-
-        .btn-dark {
-            background: #1f2937;
-            color: white;
-            width: 100%;
-        }
-
-        .btn-dark:hover {
-            background: #111827;
-        }
-
-        .participant-list {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .participant-item {
-            background: white;
-            padding: 14px;
-            margin-bottom: 10px;
+        .name-list {
+            background: #f5f5f5;
+            padding: 15px;
             border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .name-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .participant-name {
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .btn-remove {
-            background: #ef4444;
-            color: white;
-            padding: 6px 12px;
-            font-size: 14px;
-        }
-
-        .btn-remove:hover {
-            background: #dc2626;
-        }
-
-        .link-box {
-            background: #f3f4f6;
-            padding: 20px;
-            border-radius: 10px;
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
             margin: 20px 0;
-            word-break: break-all;
-            text-align: center;
-            font-family: monospace;
-            color: #1f2937;
         }
 
-        .name-button {
-            width: 100%;
-            padding: 16px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+        .number-btn {
+            padding: 20px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-size: 18px;
-            font-weight: 600;
-            background: #f3f4f6;
-            color: #1f2937;
-            border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .name-button:hover:not(:disabled) {
-            background: #e5e7eb;
-        }
-
-        .name-button.selected {
-            background: #16a34a;
+        .number-btn:hover:not(:disabled) {
+            background: #667eea;
             color: white;
-            border-color: #15803d;
+            transform: scale(1.05);
         }
 
-        .name-button:disabled {
-            background: #e5e7eb;
-            color: #9ca3af;
+        .number-btn:disabled {
+            opacity: 0.3;
             cursor: not-allowed;
         }
 
-        .shuffle-animation {
-            background: linear-gradient(135deg, #fee2e2, #dcfce7);
-            padding: 60px 40px;
-            border-radius: 16px;
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        .shuffle-name {
-            font-size: 3em;
-            font-weight: 700;
-            color: #1f2937;
-            animation: pulse 0.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .spin {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .bounce {
-            animation: bounce 1s infinite;
-        }
-
-        .result-box {
-            background: linear-gradient(135deg, #dc2626, #16a34a);
+        .result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 40px;
-            border-radius: 16px;
+            padding: 30px;
+            border-radius: 12px;
             text-align: center;
+            font-size: 1.5em;
             margin: 20px 0;
+            animation: fadeIn 0.5s;
         }
 
-        .result-name {
-            font-size: 3em;
-            font-weight: 700;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .warning-box {
-            background: #fef3c7;
-            border: 2px solid #fbbf24;
-            padding: 20px;
-            border-radius: 10px;
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .progress {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
             margin: 20px 0;
-            text-align: center;
-            color: #92400e;
-            font-weight: 600;
+            overflow: hidden;
         }
 
-        .success-icon {
-            color: #16a34a;
+        .progress-bar {
+            background: #667eea;
+            height: 100%;
+            transition: width 0.3s;
         }
 
-        .label {
-            display: block;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 10px;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mb-20 {
-            margin-bottom: 20px;
-        }
-
-        .text-small {
-            font-size: 14px;
-            color: #6b7280;
-            margin-top: 20px;
-        }
-
-        .link-button {
-            color: #2563eb;
-            background: none;
+        .remove-btn {
+            background: #ff4757;
+            color: white;
             border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
             cursor: pointer;
-            text-decoration: underline;
-            font-weight: 600;
-            padding: 0;
-            margin-top: 15px;
-        }
-
-        .link-button:hover {
-            color: #1d4ed8;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HOME SCREEN -->
-        <div id="homeScreen" class="screen active">
-            <svg class="icon" fill="currentColor" viewBox="0 0 24 24" style="color: #dc2626;">
-                <path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/>
-            </svg>
-            <h1>🎄 Secret Santa Picker</h1>
-            <p class="subtitle">Create an event and share one link with everyone!</p>
+        <h1>🎄 Christmas Friend Picker 🎁</h1>
 
-            <label class="label">Add Participants (minimum 3)</label>
-            <div class="input-group">
-                <input type="text" id="nameInput" placeholder="Enter name..." onkeypress="if(event.key==='Enter') addParticipant()">
-                <button class="btn-secondary" onclick="addParticipant()">Add</button>
+        <!-- Step 1: Setup -->
+        <div id="step1" class="step active">
+            <h2>Step 1: Add Participants</h2>
+            <input type="text" id="nameInput" placeholder="Enter participant name" onkeypress="if(event.key==='Enter') addName()">
+            <button onclick="addName()">Add Name</button>
+            
+            <div class="name-list" id="nameList" style="display:none;">
+                <h3>Participants:</h3>
+                <div id="names"></div>
             </div>
-
-            <div id="participantListContainer" style="display: none;">
-                <div class="participant-list">
-                    <h3 style="margin-bottom: 15px; color: #374151;">👥 Participants (<span id="participantCount">0</span>)</h3>
-                    <div id="participantList"></div>
-                </div>
-            </div>
-
-            <button class="btn-primary" onclick="createNewGame()" id="createBtn" disabled>
-                Create Event & Get Link
-            </button>
+            
+            <button onclick="startPicking()" id="startBtn" style="display:none; background:#28a745;">Start Picking (Minimum 3 people)</button>
         </div>
 
-        <!-- SHARE SCREEN -->
-        <div id="shareScreen" class="screen">
-            <svg class="icon success-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-            </svg>
-            <h1>Event Created! 🎉</h1>
-            <p class="subtitle">Share this link with all participants:</p>
-
-            <div class="link-box" id="eventLink"></div>
-
-            <button class="btn-secondary" onclick="copyLink()" style="width: 100%; margin-bottom: 10px;">
-                📋 Copy Link to Share
-            </button>
-
-            <p class="text-small text-center">
-                Each participant will open this link, select their name, and discover their Secret Santa friend!
-            </p>
-
-            <button class="link-button" onclick="goToParticipantScreen()">
-                I want to pick now →
-            </button>
-        </div>
-
-        <!-- PARTICIPANT SCREEN -->
-        <div id="participantScreen" class="screen">
-            <svg class="icon" fill="currentColor" viewBox="0 0 24 24" style="color: #dc2626;">
-                <path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/>
-            </svg>
-            <h1>Who are you?</h1>
-            <p class="subtitle">Select your name to start the magic! ✨</p>
-
-            <div id="nameSelection"></div>
-
-            <button class="btn-primary" onclick="startShuffle()" id="shuffleBtn" disabled>
-                ✨ Start The Magic Shuffle!
-            </button>
-        </div>
-
-        <!-- SHUFFLE SCREEN -->
-        <div id="shuffleScreen" class="screen">
-            <svg class="icon spin" fill="currentColor" viewBox="0 0 24 24" style="color: #fbbf24;">
-                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <h1>Shuffling...</h1>
-            <div class="shuffle-animation">
-                <div class="shuffle-name" id="shuffleDisplay"></div>
+        <!-- Step 2: Picking -->
+        <div id="step2" class="step">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
-            <p class="text-center" style="color: #6b7280;">The magic is happening! ✨</p>
+            
+            <h2>Who are you?</h2>
+            <input type="text" id="participantName" placeholder="Enter your name">
+            <button onclick="validateParticipant()">Continue</button>
+            <p id="errorMsg" style="color: red; margin-top: 10px;"></p>
         </div>
 
-        <!-- RESULT SCREEN -->
-        <div id="resultScreen" class="screen">
-            <svg class="icon bounce" fill="currentColor" viewBox="0 0 24 24" style="color: #dc2626;">
-                <path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/>
-            </svg>
-            <h1>Your Secret Santa Friend is...</h1>
-            <div class="result-box">
-                <div class="result-name" id="resultName"></div>
-            </div>
-            <div class="warning-box">
-                ⚠️ Remember this name! This screen will be hidden next.
-            </div>
-            <button class="btn-dark" onclick="resetForNext()">
-                Hide & Let Next Person Pick
-            </button>
+        <!-- Step 3: Choose Number -->
+        <div id="step3" class="step">
+            <h2 id="pickerName"></h2>
+            <p>Choose a number from the available options:</p>
+            <div class="number-grid" id="numberGrid"></div>
         </div>
 
-        <!-- COMPLETE SCREEN -->
-        <div id="completeScreen" class="screen">
-            <h1 style="color: #16a34a;">🎉 Everyone Has Picked!</h1>
-            <p class="text-center mb-20" style="font-size: 18px; color: #6b7280;">
-                All participants have discovered their Secret Santa friends.
-            </p>
-            <button class="btn-primary" onclick="location.reload()">
-                Create New Event
-            </button>
+        <!-- Step 4: Result -->
+        <div id="step4" class="step">
+            <div class="result" id="result"></div>
+            <div class="warning">
+                ⚠️ Press the button below to hide this screen before the next person!
+            </div>
+            <button onclick="nextParticipant()">Hide Screen & Continue</button>
+        </div>
+
+        <!-- Step 5: Complete -->
+        <div id="step5" class="step">
+            <h2 style="text-align: center; color: #28a745;">🎉 All Done!</h2>
+            <p style="text-align: center; margin: 20px 0;">Everyone has picked their Christmas friend!</p>
+            <button onclick="location.reload()" style="background: #28a745; display: block; margin: 0 auto;">Start New Session</button>
         </div>
     </div>
 
-<script>
+    <script>
         let participants = [];
-        let eventId = null;
-        let eventData = null;
-        let selectedName = '';
+        let shuffledPairs = [];
+        let currentIndex = 0;
+        let currentParticipant = '';
 
-        // Load event from URL on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlEventId = urlParams.get('event');
-            
-            if (urlEventId) {
-                loadEvent(urlEventId);
-            }
-        });
-
-        function loadEvent(id) {
-            // FIX: Use localStorage instead of window.storage
-            const storedData = localStorage.getItem(`event:${id}`);
-            
-            if (storedData) {
-                eventData = JSON.parse(storedData);
-                eventId = id;
-                participants = eventData.participants; // Ensure participants are loaded
-                updateParticipantList(); // Update UI
-                
-                // If everyone has picked, show complete screen
-                if (eventData.remaining.length === 0) {
-                     showScreen('completeScreen');
-                } else {
-                     showScreen('participantScreen');
-                     renderNameSelection();
-                }
-            } else {
-                console.log('Event not found in local storage');
-            }
-        }
-
-        function addParticipant() {
+        function addName() {
             const input = document.getElementById('nameInput');
             const name = input.value.trim().toUpperCase();
             
             if (name && !participants.includes(name)) {
                 participants.push(name);
-                updateParticipantList();
+                updateNameList();
                 input.value = '';
             }
         }
 
-        function updateParticipantList() {
-            const container = document.getElementById('participantListContainer');
-            const list = document.getElementById('participantList');
-            const count = document.getElementById('participantCount');
-            const createBtn = document.getElementById('createBtn');
+        function updateNameList() {
+            const nameList = document.getElementById('nameList');
+            const namesDiv = document.getElementById('names');
+            const startBtn = document.getElementById('startBtn');
             
             if (participants.length > 0) {
-                container.style.display = 'block';
-                count.textContent = participants.length;
+                nameList.style.display = 'block';
+                namesDiv.innerHTML = participants.map((name, idx) => 
+                    `<div class="name-item">
+                        <span>${name}</span>
+                        <button class="remove-btn" onclick="removeName(${idx})">Remove</button>
+                    </div>`
+                ).join('');
                 
-                list.innerHTML = participants.map(name => `
-                    <div class="participant-item">
-                        <span class="participant-name">${name}</span>
-                        <button class="btn-remove" onclick="removeParticipant('${name}')">Remove</button>
-                    </div>
-                `).join('');
-                
-                createBtn.disabled = participants.length < 3;
+                startBtn.style.display = participants.length >= 3 ? 'block' : 'none';
             }
         }
 
-        function removeParticipant(name) {
-            participants = participants.filter(p => p !== name);
-            updateParticipantList();
+        function removeName(idx) {
+            participants.splice(idx, 1);
+            updateNameList();
         }
 
-        function createNewGame() {
+        function startPicking() {
             if (participants.length < 3) {
                 alert('Need at least 3 participants!');
                 return;
             }
 
-            eventId = 'event_' + Math.random().toString(36).substr(2, 9);
-            eventData = {
-                participants: participants,
-                assignments: {},
-                remaining: [...participants]
-            };
+            // Create pairs (each person gets someone)
+            let available = [...participants];
+            shuffledPairs = [];
 
-            // FIX: Use localStorage
-            localStorage.setItem(`event:${eventId}`, JSON.stringify(eventData));
-            
-            const url = new URL(window.location);
-            url.searchParams.set('event', eventId);
-            window.history.pushState({}, '', url);
-            
-            const link = url.toString();
-            document.getElementById('eventLink').textContent = link;
-            
-            // Update the text to reflect that this is local only
-            document.querySelector('#shareScreen .subtitle').textContent = "Pass this device around! (Link only works on this device)";
-            
-            showScreen('shareScreen');
-        }
-
-        function copyLink() {
-            const link = document.getElementById('eventLink').textContent;
-            navigator.clipboard.writeText(link);
-            alert('Link copied! NOTE: This link will only work on THIS device.');
-        }
-
-        function goToParticipantScreen() {
-            showScreen('participantScreen');
-            renderNameSelection();
-        }
-
-        function renderNameSelection() {
-            const container = document.getElementById('nameSelection');
-            const availableToSelect = eventData.participants.filter(name => !eventData.assignments[name]);
-            
-            if (availableToSelect.length === 0) {
-                showScreen('completeScreen');
-                return;
-            }
-            
-            container.innerHTML = eventData.participants.map(name => {
-                const alreadyPicked = !!eventData.assignments[name];
-                return `
-                    <button 
-                        class="name-button ${selectedName === name ? 'selected' : ''}" 
-                        onclick="selectName('${name}')"
-                        ${alreadyPicked ? 'disabled' : ''}
-                    >
-                        ${name} ${alreadyPicked ? '✓' : ''}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function selectName(name) {
-            if (eventData.assignments[name]) return;
-            selectedName = name;
-            renderNameSelection();
-            document.getElementById('shuffleBtn').disabled = false;
-        }
-
-        function startShuffle() {
-            if (!selectedName) {
-                alert('Please select your name first!');
-                return;
-            }
-
-            // Check if already picked
-            if (eventData.assignments[selectedName]) {
-                document.getElementById('resultName').textContent = eventData.assignments[selectedName];
-                showScreen('resultScreen');
-                return;
-            }
-
-            showScreen('shuffleScreen');
-
-            // Animate shuffle
-            let iterations = 0;
-            const maxIterations = 30;
-            
-            const shuffleInterval = setInterval(() => {
-                // Filter out self from shuffle animation
-                const availableNames = eventData.participants.filter(n => n !== selectedName);
-                const randomName = availableNames[Math.floor(Math.random() * availableNames.length)];
-                document.getElementById('shuffleDisplay').textContent = randomName;
+            for (let i = 0; i < participants.length; i++) {
+                let giver = participants[i];
+                let possibleReceivers = available.filter(name => name !== giver);
                 
-                iterations++;
-                if (iterations >= maxIterations) {
-                    clearInterval(shuffleInterval);
-                    finalizePick();
+                // If last person would get themselves, swap with previous
+                if (possibleReceivers.length === 1 && possibleReceivers[0] === giver) {
+                    const lastPair = shuffledPairs[shuffledPairs.length - 1];
+                    possibleReceivers = [lastPair.receiver];
+                    shuffledPairs[shuffledPairs.length - 1].receiver = giver;
                 }
-            }, 100);
-        }
-
-        function finalizePick() {
-            // Logic to prevent picking yourself
-            let available = eventData.remaining.filter(n => n !== selectedName);
-            
-            // If the only person left is me, we have a deadlock (rare edge case in simple logic)
-            // But for simple usage:
-            if (available.length === 0) {
-                 alert("Error: Only you are left! The last person cannot pick themselves. Please restart.");
-                 return;
+                
+                const receiver = possibleReceivers[Math.floor(Math.random() * possibleReceivers.length)];
+                shuffledPairs.push({ giver, receiver });
+                available = available.filter(name => name !== receiver);
             }
 
-            const assignedFriend = available[Math.floor(Math.random() * available.length)];
+            // Shuffle the order of picking
+            shuffledPairs.sort(() => Math.random() - 0.5);
             
-            eventData.assignments[selectedName] = assignedFriend;
-            // Remove the picked person from the pool of available targets
-            eventData.remaining = eventData.remaining.filter(n => n !== assignedFriend);
-            
-            // FIX: Save to localStorage
-            localStorage.setItem(`event:${eventId}`, JSON.stringify(eventData));
-            
-            setTimeout(() => {
-                document.getElementById('resultName').textContent = assignedFriend;
-                showScreen('resultScreen');
-            }, 500);
+            showStep('step2');
+            updateProgress();
         }
 
-        function resetForNext() {
-            selectedName = '';
-            document.getElementById('shuffleBtn').disabled = true;
-            showScreen('participantScreen');
-            renderNameSelection();
+        function validateParticipant() {
+            const input = document.getElementById('participantName');
+            const name = input.value.trim().toUpperCase();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            const pair = shuffledPairs.find(p => p.giver === name && !p.revealed);
+            
+            if (!pair) {
+                errorMsg.textContent = 'Name not found or you already picked!';
+                return;
+            }
+            
+            currentParticipant = name;
+            pair.currentlyPicking = true;
+            input.value = '';
+            errorMsg.textContent = '';
+            showNumberSelection();
         }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
+        function showNumberSelection() {
+            const pickerName = document.getElementById('pickerName');
+            const numberGrid = document.getElementById('numberGrid');
+            
+            pickerName.textContent = `Hello, ${currentParticipant}!`;
+            
+            // Show all numbers, but disable the ones that would give them themselves
+            numberGrid.innerHTML = '';
+            for (let i = 0; i < shuffledPairs.length; i++) {
+                const pair = shuffledPairs[i];
+                if (pair.revealed) continue;
+                
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = i + 1;
+                
+                if (pair.giver === currentParticipant) {
+                    btn.disabled = false;
+                    btn.onclick = () => revealPick(i);
+                } else {
+                    btn.disabled = true;
+                }
+                
+                numberGrid.appendChild(btn);
+            }
+            
+            showStep('step3');
+        }
+
+        function revealPick(index) {
+            const pair = shuffledPairs[index];
+            pair.revealed = true;
+            currentIndex++;
+            
+            document.getElementById('result').textContent = `🎁 Your Christmas friend is: ${pair.receiver}`;
+            showStep('step4');
+            updateProgress();
+        }
+
+        function nextParticipant() {
+            if (currentIndex >= participants.length) {
+                showStep('step5');
+            } else {
+                showStep('step2');
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentIndex / participants.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
             });
-            document.getElementById(screenId).classList.add('active');
+            document.getElementById(stepId).classList.add('active');
         }
     </script>
 </body>
