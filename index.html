@@ -408,7 +408,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         let participants = [];
         let eventId = null;
         let eventData = null;
@@ -424,17 +424,25 @@
             }
         });
 
-        async function loadEvent(id) {
-            try {
-                const result = await window.storage.get(`event:${id}`, true);
-                if (result) {
-                    eventData = JSON.parse(result.value);
-                    eventId = id;
-                    showScreen('participantScreen');
-                    renderNameSelection();
+        function loadEvent(id) {
+            // FIX: Use localStorage instead of window.storage
+            const storedData = localStorage.getItem(`event:${id}`);
+            
+            if (storedData) {
+                eventData = JSON.parse(storedData);
+                eventId = id;
+                participants = eventData.participants; // Ensure participants are loaded
+                updateParticipantList(); // Update UI
+                
+                // If everyone has picked, show complete screen
+                if (eventData.remaining.length === 0) {
+                     showScreen('completeScreen');
+                } else {
+                     showScreen('participantScreen');
+                     renderNameSelection();
                 }
-            } catch (error) {
-                console.log('Event not found');
+            } else {
+                console.log('Event not found in local storage');
             }
         }
 
@@ -475,7 +483,7 @@
             updateParticipantList();
         }
 
-        async function createEvent() {
+        function createEvent() {
             if (participants.length < 3) {
                 alert('Need at least 3 participants!');
                 return;
@@ -488,32 +496,26 @@
                 remaining: [...participants]
             };
 
-            try {
-                // Check if storage is available
-                if (typeof window.storage === 'undefined') {
-                    alert('⚠️ This feature requires persistent storage which is only available when deployed online. Please deploy this to Netlify, GitHub Pages, or Vercel to use the shared link feature.');
-                    return;
-                }
-
-                await window.storage.set(`event:${eventId}`, JSON.stringify(eventData), true);
-                
-                const url = new URL(window.location);
-                url.searchParams.set('event', eventId);
-                window.history.pushState({}, '', url);
-                
-                const link = url.toString();
-                document.getElementById('eventLink').textContent = link;
-                showScreen('shareScreen');
-            } catch (error) {
-                console.error('Storage error:', error);
-                alert('⚠️ Storage not available. This app needs to be deployed online (Netlify, GitHub Pages, etc.) to work properly with shared links.');
-            }
+            // FIX: Use localStorage
+            localStorage.setItem(`event:${eventId}`, JSON.stringify(eventData));
+            
+            const url = new URL(window.location);
+            url.searchParams.set('event', eventId);
+            window.history.pushState({}, '', url);
+            
+            const link = url.toString();
+            document.getElementById('eventLink').textContent = link;
+            
+            // Update the text to reflect that this is local only
+            document.querySelector('#shareScreen .subtitle').textContent = "Pass this device around! (Link only works on this device)";
+            
+            showScreen('shareScreen');
         }
 
         function copyLink() {
             const link = document.getElementById('eventLink').textContent;
             navigator.clipboard.writeText(link);
-            alert('Link copied! Share it with all participants 🎄');
+            alert('Link copied! NOTE: This link will only work on THIS device.');
         }
 
         function goToParticipantScreen() {
@@ -551,7 +553,7 @@
             document.getElementById('shuffleBtn').disabled = false;
         }
 
-        async function startShuffle() {
+        function startShuffle() {
             if (!selectedName) {
                 alert('Please select your name first!');
                 return;
@@ -571,7 +573,8 @@
             const maxIterations = 30;
             
             const shuffleInterval = setInterval(() => {
-                const availableNames = eventData.remaining.filter(n => n !== selectedName);
+                // Filter out self from shuffle animation
+                const availableNames = eventData.participants.filter(n => n !== selectedName);
                 const randomName = availableNames[Math.floor(Math.random() * availableNames.length)];
                 document.getElementById('shuffleDisplay').textContent = randomName;
                 
@@ -583,14 +586,25 @@
             }, 100);
         }
 
-        async function finalizePick() {
+        function finalizePick() {
+            // Logic to prevent picking yourself
             let available = eventData.remaining.filter(n => n !== selectedName);
+            
+            // If the only person left is me, we have a deadlock (rare edge case in simple logic)
+            // But for simple usage:
+            if (available.length === 0) {
+                 alert("Error: Only you are left! The last person cannot pick themselves. Please restart.");
+                 return;
+            }
+
             const assignedFriend = available[Math.floor(Math.random() * available.length)];
             
             eventData.assignments[selectedName] = assignedFriend;
+            // Remove the picked person from the pool of available targets
             eventData.remaining = eventData.remaining.filter(n => n !== assignedFriend);
             
-            await window.storage.set(`event:${eventId}`, JSON.stringify(eventData), true);
+            // FIX: Save to localStorage
+            localStorage.setItem(`event:${eventId}`, JSON.stringify(eventData));
             
             setTimeout(() => {
                 document.getElementById('resultName').textContent = assignedFriend;
