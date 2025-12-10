@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa</title>
+</head>
+<body>
+    <h1>Secret Santa Participant List</h1>
+    <form method="POST">
+        <label for="name">Enter your name:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="submit">Add Name</button>
+    </form>
+
+    <h2>Participants:</h2>
+    <ul>
+        {% for participant in participants %}
+            <li>{{ participant }}</li>
+        {% endfor %}
+    </ul>
+    <br>
+    {% if participants|length > 1 %}
+        <a href="{{ url_for('shuffle') }}">Shuffle Names & Assign Secret Santa</a>
+    {% else %}
+        <p>Not enough participants to shuffle.</p>
+    {% endif %}
+</body>
+</html>
