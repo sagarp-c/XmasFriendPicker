@@ -488,15 +488,26 @@
                 remaining: [...participants]
             };
 
-            await window.storage.set(`event:${eventId}`, JSON.stringify(eventData), true);
-            
-            const url = new URL(window.location);
-            url.searchParams.set('event', eventId);
-            window.history.pushState({}, '', url);
-            
-            const link = url.toString();
-            document.getElementById('eventLink').textContent = link;
-            showScreen('shareScreen');
+            try {
+                // Check if storage is available
+                if (typeof window.storage === 'undefined') {
+                    alert('⚠️ This feature requires persistent storage which is only available when deployed online. Please deploy this to Netlify, GitHub Pages, or Vercel to use the shared link feature.');
+                    return;
+                }
+
+                await window.storage.set(`event:${eventId}`, JSON.stringify(eventData), true);
+                
+                const url = new URL(window.location);
+                url.searchParams.set('event', eventId);
+                window.history.pushState({}, '', url);
+                
+                const link = url.toString();
+                document.getElementById('eventLink').textContent = link;
+                showScreen('shareScreen');
+            } catch (error) {
+                console.error('Storage error:', error);
+                alert('⚠️ Storage not available. This app needs to be deployed online (Netlify, GitHub Pages, etc.) to work properly with shared links.');
+            }
         }
 
         function copyLink() {
