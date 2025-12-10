@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 Christmas Friend Picker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .name-list {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .name-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .number-btn {
+            padding: 20px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .number-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .number-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .progress {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #667eea;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎄 Christmas Friend Picker 🎁</h1>
+
+        <!-- Step 1: Setup -->
+        <div id="step1" class="step active">
+            <h2>Step 1: Add Participants</h2>
+            <input type="text" id="nameInput" placeholder="Enter participant name" onkeypress="if(event.key==='Enter') addName()">
+            <button onclick="addName()">Add Name</button>
+            
+            <div class="name-list" id="nameList" style="display:none;">
+                <h3>Participants:</h3>
+                <div id="names"></div>
+            </div>
+            
+            <button onclick="startPicking()" id="startBtn" style="display:none; background:#28a745;">Start Picking (Minimum 3 people)</button>
+        </div>
+
+        <!-- Step 2: Picking -->
+        <div id="step2" class="step">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <h2>Who are you?</h2>
+            <input type="text" id="participantName" placeholder="Enter your name">
+            <button onclick="validateParticipant()">Continue</button>
+            <p id="errorMsg" style="color: red; margin-top: 10px;"></p>
+        </div>
+
+        <!-- Step 3: Choose Number -->
+        <div id="step3" class="step">
+            <h2 id="pickerName"></h2>
+            <p>Choose a number from the available options:</p>
+            <div class="number-grid" id="numberGrid"></div>
+        </div>
+
+        <!-- Step 4: Result -->
+        <div id="step4" class="step">
+            <div class="result" id="result"></div>
+            <div class="warning">
+                ⚠️ Press the button below to hide this screen before the next person!
+            </div>
+            <button onclick="nextParticipant()">Hide Screen & Continue</button>
+        </div>
+
+        <!-- Step 5: Complete -->
+        <div id="step5" class="step">
+            <h2 style="text-align: center; color: #28a745;">🎉 All Done!</h2>
+            <p style="text-align: center; margin: 20px 0;">Everyone has picked their Christmas friend!</p>
+            <button onclick="location.reload()" style="background: #28a745; display: block; margin: 0 auto;">Start New Session</button>
+        </div>
+    </div>
+
+    <script>
+        let participants = [];
+        let shuffledPairs = [];
+        let currentIndex = 0;
+        let currentParticipant = '';
+
+        function addName() {
+            const input = document.getElementById('nameInput');
+            const name = input.value.trim().toUpperCase();
+            
+            if (name && !participants.includes(name)) {
+                participants.push(name);
+                updateNameList();
+                input.value = '';
+            }
+        }
+
+        function updateNameList() {
+            const nameList = document.getElementById('nameList');
+            const namesDiv = document.getElementById('names');
+            const startBtn = document.getElementById('startBtn');
+            
+            if (participants.length > 0) {
+                nameList.style.display = 'block';
+                namesDiv.innerHTML = participants.map((name, idx) => 
+                    `<div class="name-item">
+                        <span>${name}</span>
+                        <button class="remove-btn" onclick="removeName(${idx})">Remove</button>
+                    </div>`
+                ).join('');
+                
+                startBtn.style.display = participants.length >= 3 ? 'block' : 'none';
+            }
+        }
+
+        function removeName(idx) {
+            participants.splice(idx, 1);
+            updateNameList();
+        }
+
+        function startPicking() {
+            if (participants.length < 3) {
+                alert('Need at least 3 participants!');
+                return;
+            }
+
+            // Create pairs (each person gets someone)
+            let available = [...participants];
+            shuffledPairs = [];
+
+            for (let i = 0; i < participants.length; i++) {
+                let giver = participants[i];
+                let possibleReceivers = available.filter(name => name !== giver);
+                
+                // If last person would get themselves, swap with previous
+                if (possibleReceivers.length === 1 && possibleReceivers[0] === giver) {
+                    const lastPair = shuffledPairs[shuffledPairs.length - 1];
+                    possibleReceivers = [lastPair.receiver];
+                    shuffledPairs[shuffledPairs.length - 1].receiver = giver;
+                }
+                
+                const receiver = possibleReceivers[Math.floor(Math.random() * possibleReceivers.length)];
+                shuffledPairs.push({ giver, receiver });
+                available = available.filter(name => name !== receiver);
+            }
+
+            // Shuffle the order of picking
+            shuffledPairs.sort(() => Math.random() - 0.5);
+            
+            showStep('step2');
+            updateProgress();
+        }
+
+        function validateParticipant() {
+            const input = document.getElementById('participantName');
+            const name = input.value.trim().toUpperCase();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            const pair = shuffledPairs.find(p => p.giver === name && !p.revealed);
+            
+            if (!pair) {
+                errorMsg.textContent = 'Name not found or you already picked!';
+                return;
+            }
+            
+            currentParticipant = name;
+            pair.currentlyPicking = true;
+            input.value = '';
+            errorMsg.textContent = '';
+            showNumberSelection();
+        }
+
+        function showNumberSelection() {
+            const pickerName = document.getElementById('pickerName');
+            const numberGrid = document.getElementById('numberGrid');
+            
+            pickerName.textContent = `Hello, ${currentParticipant}!`;
+            
+            // Show all numbers, but disable the ones that would give them themselves
+            numberGrid.innerHTML = '';
+            for (let i = 0; i < shuffledPairs.length; i++) {
+                const pair = shuffledPairs[i];
+                if (pair.revealed) continue;
+                
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = i + 1;
+                
+                if (pair.giver === currentParticipant) {
+                    btn.disabled = false;
+                    btn.onclick = () => revealPick(i);
+                } else {
+                    btn.disabled = true;
+                }
+                
+                numberGrid.appendChild(btn);
+            }
+            
+            showStep('step3');
+        }
+
+        function revealPick(index) {
+            const pair = shuffledPairs[index];
+            pair.revealed = true;
+            currentIndex++;
+            
+            document.getElementById('result').textContent = `🎁 Your Christmas friend is: ${pair.receiver}`;
+            showStep('step4');
+            updateProgress();
+        }
+
+        function nextParticipant() {
+            if (currentIndex >= participants.length) {
+                showStep('step5');
+            } else {
+                showStep('step2');
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentIndex / participants.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(stepId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
