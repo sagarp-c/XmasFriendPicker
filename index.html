@@ -59,9 +59,10 @@
           const [stage, setStage] = useState('setup');
           const [names, setNames] = useState(['']);
           const [shuffledNames, setShuffledNames] = useState([]);
+          const [pickedIndices, setPickedIndices] = useState([]);
           const [currentPicker, setCurrentPicker] = useState('');
           const [pickedFriend, setPickedFriend] = useState('');
-          const [pickHistory, setPickHistory] = useState([]);
+          const [whoHasPicked, setWhoHasPicked] = useState([]);
           const [availableIndices, setAvailableIndices] = useState([]);
           const [showResult, setShowResult] = useState(false);
           const [error, setError] = useState('');
@@ -97,6 +98,8 @@
             }
 
             setShuffledNames(shuffled);
+            setPickedIndices([]);
+            setWhoHasPicked([]);
             setStage('picking');
             setError('');
           };
@@ -104,27 +107,49 @@
           const startPicking = () => {
             const participant = currentPicker.toUpperCase().trim();
             
-            if (!names.map(n => n.trim()).includes(participant)) {
+            const validNames = names.filter(n => n.trim() !== '');
+            if (!validNames.includes(participant)) {
               setError('Name not in participant list!');
               return;
             }
 
-            if (pickHistory.includes(participant)) {
+            if (whoHasPicked.includes(participant)) {
               setError('You already picked!');
               return;
             }
 
+            let workingShuffled = [...shuffledNames];
+            const remainingCount = validNames.length - whoHasPicked.length;
+
+            // Handle last participant edge case
+            if (remainingCount === 1 && pickedIndices.length === shuffledNames.length - 1) {
+              // Find the only remaining index
+              const lastIndex = shuffledNames.findIndex((_, idx) => !pickedIndices.includes(idx));
+              
+              // If the last paper has the participant's own name
+              if (lastIndex !== -1 && workingShuffled[lastIndex] === participant) {
+                // Swap with a random already-picked paper
+                if (pickedIndices.length > 0) {
+                  const randomPickedIndex = pickedIndices[Math.floor(Math.random() * pickedIndices.length)];
+                  [workingShuffled[lastIndex], workingShuffled[randomPickedIndex]] = 
+                    [workingShuffled[randomPickedIndex], workingShuffled[lastIndex]];
+                  setShuffledNames(workingShuffled);
+                }
+              }
+            }
+
+            // Calculate available indices
             const available = [];
-            for (let i = 0; i < shuffledNames.length; i++) {
-              if (shuffledNames[i] !== participant && !pickHistory.includes(shuffledNames[i])) {
+            for (let i = 0; i < workingShuffled.length; i++) {
+              // Available if: not already picked AND not participant's own name
+              if (!pickedIndices.includes(i) && workingShuffled[i] !== participant) {
                 available.push(i);
               }
             }
 
-            if (available.length === 1 && shuffledNames[available[0]] === participant) {
-              const swapIdx = Math.floor(Math.random() * pickHistory.length);
-              const temp = shuffledNames[available[0]];
-              shuffledNames[available[0]] = pickHistory[swapIdx];
+            if (available.length === 0) {
+              setError('No valid choices available!');
+              return;
             }
 
             setAvailableIndices(available);
@@ -135,10 +160,12 @@
             const friend = shuffledNames[index];
             setPickedFriend(friend);
             setShowResult(true);
-            setPickHistory([...pickHistory, currentPicker.toUpperCase().trim(), friend]);
+            
+            setWhoHasPicked([...whoHasPicked, currentPicker.toUpperCase().trim()]);
+            setPickedIndices([...pickedIndices, index]);
 
             const validNames = names.filter(n => n.trim() !== '');
-            if (pickHistory.length + 2 >= validNames.length * 2) {
+            if (whoHasPicked.length + 1 >= validNames.length) {
               setTimeout(() => setStage('complete'), 2000);
             }
           };
@@ -154,9 +181,10 @@
             setStage('setup');
             setNames(['']);
             setShuffledNames([]);
+            setPickedIndices([]);
             setCurrentPicker('');
             setPickedFriend('');
-            setPickHistory([]);
+            setWhoHasPicked([]);
             setAvailableIndices([]);
             setShowResult(false);
             setError('');
@@ -232,9 +260,12 @@
                           <div className="space-y-4">
                             <div className="text-center p-4 bg-green-50 rounded-lg">
                               <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                                Next Participant
+                                Participant {whoHasPicked.length + 1} of {names.filter(n => n.trim() !== '').length}
                               </h2>
-                              <p className="text-gray-600">Enter your name to pick your friend</p>
+                              <p className="text-gray-600">Enter your name to see available papers</p>
+                              <p className="text-sm text-gray-500 mt-2">
+                                {pickedIndices.length} paper(s) already picked
+                              </p>
                             </div>
 
                             <input
@@ -256,7 +287,7 @@
                               onClick={startPicking}
                               className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
                             >
-                              Continue
+                              Show Available Papers
                             </button>
                           </div>
                         ) : (
@@ -266,18 +297,34 @@
                                 Pick a Number
                               </h2>
                               <p className="text-gray-600">Choose your mystery friend!</p>
+                              <p className="text-sm text-gray-500 mt-1">
+                                Gray = Already picked OR your own name
+                              </p>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3">
-                              {availableIndices.map((idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => pickFriend(idx)}
-                                  className="aspect-square bg-gradient-to-br from-red-500 to-green-500 text-white rounded-xl text-2xl font-bold hover:scale-105 transition shadow-lg hover:shadow-xl"
-                                >
-                                  {idx + 1}
-                                </button>
-                              ))}
+                            <div className="grid grid-cols-4 gap-3">
+                              {shuffledNames.map((name, idx) => {
+                                const isAvailable = availableIndices.includes(idx);
+                                const isPicked = pickedIndices.includes(idx);
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => isAvailable && pickFriend(idx)}
+                                    disabled={!isAvailable}
+                                    className={`aspect-square rounded-xl text-2xl font-bold transition shadow-lg ${
+                                      isAvailable
+                                        ? 'bg-gradient-to-br from-red-500 to-green-500 text-white hover:scale-105 hover:shadow-xl cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                  >
+                                    {idx + 1}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            <div className="text-center text-sm text-gray-600">
+                              Available choices: {availableIndices.length}
                             </div>
                           </div>
                         )}
@@ -289,7 +336,7 @@
                         <div className="text-center p-8 bg-gradient-to-br from-red-50 to-green-50 rounded-xl">
                           <Gift className="w-16 h-16 mx-auto mb-4 text-red-600" />
                           <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                            Your Xmas Friend is:
+                            🎁 Your Xmas Friend is:
                           </h2>
                           <p className="text-4xl font-bold text-red-600">
                             {pickedFriend}
@@ -338,10 +385,11 @@
                     <p className="font-semibold mb-2">How it works:</p>
                     <ol className="list-decimal list-inside space-y-1">
                       <li>Add all participant names</li>
-                      <li>Click "Start Secret Santa" to shuffle</li>
-                      <li>Each person enters their name and picks a number</li>
-                      <li>They'll see their Secret Santa friend</li>
-                      <li>Pass the device to the next person</li>
+                      <li>Names are shuffled like folded papers</li>
+                      <li>Each person enters their name</li>
+                      <li>See all numbers - gray = already picked or your name</li>
+                      <li>Pick an available number to reveal your friend</li>
+                      <li>Last person is automatically handled to avoid picking themselves</li>
                     </ol>
                   </div>
                 )}
