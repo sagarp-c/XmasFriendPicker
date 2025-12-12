@@ -3,383 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎄 Christmas Friend Picker</title>
+    <title>🎄 Xmas Friend Picker - Secret Santa</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 30px;
-            font-size: 2em;
-        }
-
-        .step {
-            display: none;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #5568d3;
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .name-list {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        .name-item {
-            background: white;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .number-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .number-btn {
-            padding: 20px;
-            background: #f0f0f0;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .number-btn:hover:not(:disabled) {
-            background: #667eea;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .number-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .result {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 1.5em;
-            margin: 20px 0;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .progress {
-            background: #e0e0e0;
-            height: 8px;
-            border-radius: 4px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background: #667eea;
-            height: 100%;
-            transition: width 0.3s;
-        }
-
-        .remove-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
+        body { margin: 0; padding: 0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎄 Christmas Friend Picker 🎁</h1>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        // Lucide icons as SVG components
+        const Gift = (props) => (
+            <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12"/>
+                <rect width="20" height="5" x="2" y="7"/>
+                <line x1="12" x2="12" y1="22" y2="7"/>
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+            </svg>
+        );
 
-        <!-- Step 1: Setup -->
-        <div id="step1" class="step active">
-            <h2>Step 1: Add Participants</h2>
-            <input type="text" id="nameInput" placeholder="Enter participant name" onkeypress="if(event.key==='Enter') addName()">
-            <button onclick="addName()">Add Name</button>
+        const Users = (props) => (
+            <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        );
+
+        const Shuffle = (props) => (
+            <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/>
+                <polyline points="18 2 22 6 18 10"/>
+                <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/>
+                <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/>
+                <polyline points="18 14 22 18 18 22"/>
+            </svg>
+        );
+
+        const Eye = (props) => (
+            <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        );
+
+        const XmasFriendPicker = () => {
+          const [stage, setStage] = useState('setup');
+          const [names, setNames] = useState(['']);
+          const [shuffledNames, setShuffledNames] = useState([]);
+          const [currentPicker, setCurrentPicker] = useState('');
+          const [pickedFriend, setPickedFriend] = useState('');
+          const [pickHistory, setPickHistory] = useState([]);
+          const [availableIndices, setAvailableIndices] = useState([]);
+          const [showResult, setShowResult] = useState(false);
+          const [error, setError] = useState('');
+
+          const addName = () => {
+            setNames([...names, '']);
+          };
+
+          const updateName = (index, value) => {
+            const newNames = [...names];
+            newNames[index] = value.toUpperCase();
+            setNames(newNames);
+          };
+
+          const removeName = (index) => {
+            if (names.length > 1) {
+              const newNames = names.filter((_, i) => i !== index);
+              setNames(newNames);
+            }
+          };
+
+          const shuffleNames = () => {
+            const validNames = names.filter(n => n.trim() !== '');
+            if (validNames.length < 2) {
+              setError('Need at least 2 participants!');
+              return;
+            }
+
+            const shuffled = [...validNames];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            setShuffledNames(shuffled);
+            setStage('picking');
+            setError('');
+          };
+
+          const startPicking = () => {
+            const participant = currentPicker.toUpperCase().trim();
             
-            <div class="name-list" id="nameList" style="display:none;">
-                <h3>Participants:</h3>
-                <div id="names"></div>
+            if (!names.map(n => n.trim()).includes(participant)) {
+              setError('Name not in participant list!');
+              return;
+            }
+
+            if (pickHistory.includes(participant)) {
+              setError('You already picked!');
+              return;
+            }
+
+            const available = [];
+            for (let i = 0; i < shuffledNames.length; i++) {
+              if (shuffledNames[i] !== participant && !pickHistory.includes(shuffledNames[i])) {
+                available.push(i);
+              }
+            }
+
+            if (available.length === 1 && shuffledNames[available[0]] === participant) {
+              const swapIdx = Math.floor(Math.random() * pickHistory.length);
+              const temp = shuffledNames[available[0]];
+              shuffledNames[available[0]] = pickHistory[swapIdx];
+            }
+
+            setAvailableIndices(available);
+            setError('');
+          };
+
+          const pickFriend = (index) => {
+            const friend = shuffledNames[index];
+            setPickedFriend(friend);
+            setShowResult(true);
+            setPickHistory([...pickHistory, currentPicker.toUpperCase().trim(), friend]);
+
+            const validNames = names.filter(n => n.trim() !== '');
+            if (pickHistory.length + 2 >= validNames.length * 2) {
+              setTimeout(() => setStage('complete'), 2000);
+            }
+          };
+
+          const nextParticipant = () => {
+            setCurrentPicker('');
+            setPickedFriend('');
+            setShowResult(false);
+            setAvailableIndices([]);
+          };
+
+          const reset = () => {
+            setStage('setup');
+            setNames(['']);
+            setShuffledNames([]);
+            setCurrentPicker('');
+            setPickedFriend('');
+            setPickHistory([]);
+            setAvailableIndices([]);
+            setShowResult(false);
+            setError('');
+          };
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-red-50 via-green-50 to-red-50 p-4">
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-600 to-green-600 p-6 text-white">
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                      <Gift className="w-8 h-8" />
+                      <h1 className="text-3xl font-bold">🎄 Xmas Friend Picker</h1>
+                      <Gift className="w-8 h-8" />
+                    </div>
+                    <p className="text-center text-red-100">Secret Santa made simple!</p>
+                  </div>
+
+                  <div className="p-6">
+                    {stage === 'setup' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Users className="w-5 h-5 text-red-600" />
+                          <h2 className="text-xl font-semibold text-gray-800">Add Participants</h2>
+                        </div>
+
+                        {names.map((name, index) => (
+                          <div key={index} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={name}
+                              onChange={(e) => updateName(index, e.target.value)}
+                              placeholder={`Person ${index + 1}`}
+                              className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none"
+                            />
+                            {names.length > 1 && (
+                              <button
+                                onClick={() => removeName(index)}
+                                className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        {error && (
+                          <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                            {error}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={addName}
+                          className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-red-500 hover:text-red-600 transition"
+                        >
+                          + Add Another Person
+                        </button>
+
+                        <button
+                          onClick={shuffleNames}
+                          className="w-full py-3 bg-gradient-to-r from-red-600 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center justify-center gap-2"
+                        >
+                          <Shuffle className="w-5 h-5" />
+                          Start Secret Santa
+                        </button>
+                      </div>
+                    )}
+
+                    {stage === 'picking' && !showResult && (
+                      <div className="space-y-4">
+                        {availableIndices.length === 0 ? (
+                          <div className="space-y-4">
+                            <div className="text-center p-4 bg-green-50 rounded-lg">
+                              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                Next Participant
+                              </h2>
+                              <p className="text-gray-600">Enter your name to pick your friend</p>
+                            </div>
+
+                            <input
+                              type="text"
+                              value={currentPicker}
+                              onChange={(e) => setCurrentPicker(e.target.value)}
+                              placeholder="Your name"
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none text-center text-lg"
+                              onKeyPress={(e) => e.key === 'Enter' && startPicking()}
+                            />
+
+                            {error && (
+                              <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                                {error}
+                              </div>
+                            )}
+
+                            <button
+                              onClick={startPicking}
+                              className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                            >
+                              Continue
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="text-center p-4 bg-red-50 rounded-lg">
+                              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                Pick a Number
+                              </h2>
+                              <p className="text-gray-600">Choose your mystery friend!</p>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-3">
+                              {availableIndices.map((idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => pickFriend(idx)}
+                                  className="aspect-square bg-gradient-to-br from-red-500 to-green-500 text-white rounded-xl text-2xl font-bold hover:scale-105 transition shadow-lg hover:shadow-xl"
+                                >
+                                  {idx + 1}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {stage === 'picking' && showResult && (
+                      <div className="space-y-4">
+                        <div className="text-center p-8 bg-gradient-to-br from-red-50 to-green-50 rounded-xl">
+                          <Gift className="w-16 h-16 mx-auto mb-4 text-red-600" />
+                          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                            Your Xmas Friend is:
+                          </h2>
+                          <p className="text-4xl font-bold text-red-600">
+                            {pickedFriend}
+                          </p>
+                        </div>
+
+                        <div className="p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                          <p className="text-sm text-yellow-800 text-center">
+                            <Eye className="w-4 h-4 inline mr-1" />
+                            Remember this name! Pass the device to the next person.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={nextParticipant}
+                          className="w-full py-3 bg-gradient-to-r from-red-600 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
+                        >
+                          Next Participant
+                        </button>
+                      </div>
+                    )}
+
+                    {stage === 'complete' && (
+                      <div className="text-center space-y-6 py-8">
+                        <div className="text-6xl">🎉</div>
+                        <h2 className="text-3xl font-bold text-gray-800">
+                          All Done!
+                        </h2>
+                        <p className="text-gray-600 text-lg">
+                          Everyone has picked their Secret Santa friend!
+                        </p>
+                        <div className="text-4xl">🎄🎁✨</div>
+                        <button
+                          onClick={reset}
+                          className="px-8 py-3 bg-gradient-to-r from-red-600 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
+                        >
+                          Start New Game
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {stage === 'setup' && (
+                  <div className="mt-4 p-4 bg-white/80 rounded-lg text-sm text-gray-600">
+                    <p className="font-semibold mb-2">How it works:</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>Add all participant names</li>
+                      <li>Click "Start Secret Santa" to shuffle</li>
+                      <li>Each person enters their name and picks a number</li>
+                      <li>They'll see their Secret Santa friend</li>
+                      <li>Pass the device to the next person</li>
+                    </ol>
+                  </div>
+                )}
+              </div>
             </div>
-            
-            <button onclick="startPicking()" id="startBtn" style="display:none; background:#28a745;">Start Picking (Minimum 3 people)</button>
-        </div>
+          );
+        };
 
-        <!-- Step 2: Picking -->
-        <div id="step2" class="step">
-            <div class="progress">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            
-            <h2>Who are you?</h2>
-            <input type="text" id="participantName" placeholder="Enter your name">
-            <button onclick="validateParticipant()">Continue</button>
-            <p id="errorMsg" style="color: red; margin-top: 10px;"></p>
-        </div>
-
-        <!-- Step 3: Choose Number -->
-        <div id="step3" class="step">
-            <h2 id="pickerName"></h2>
-            <p>Choose a number from the available options:</p>
-            <div class="number-grid" id="numberGrid"></div>
-        </div>
-
-        <!-- Step 4: Result -->
-        <div id="step4" class="step">
-            <div class="result" id="result"></div>
-            <div class="warning">
-                ⚠️ Press the button below to hide this screen before the next person!
-            </div>
-            <button onclick="nextParticipant()">Hide Screen & Continue</button>
-        </div>
-
-        <!-- Step 5: Complete -->
-        <div id="step5" class="step">
-            <h2 style="text-align: center; color: #28a745;">🎉 All Done!</h2>
-            <p style="text-align: center; margin: 20px 0;">Everyone has picked their Christmas friend!</p>
-            <button onclick="location.reload()" style="background: #28a745; display: block; margin: 0 auto;">Start New Session</button>
-        </div>
-    </div>
-
-    <script>
-        let participants = [];
-        let shuffledPairs = [];
-        let currentIndex = 0;
-        let currentParticipant = '';
-
-        function addName() {
-            const input = document.getElementById('nameInput');
-            const name = input.value.trim().toUpperCase();
-            
-            if (name && !participants.includes(name)) {
-                participants.push(name);
-                updateNameList();
-                input.value = '';
-            }
-        }
-
-        function updateNameList() {
-            const nameList = document.getElementById('nameList');
-            const namesDiv = document.getElementById('names');
-            const startBtn = document.getElementById('startBtn');
-            
-            if (participants.length > 0) {
-                nameList.style.display = 'block';
-                namesDiv.innerHTML = participants.map((name, idx) => 
-                    `<div class="name-item">
-                        <span>${name}</span>
-                        <button class="remove-btn" onclick="removeName(${idx})">Remove</button>
-                    </div>`
-                ).join('');
-                
-                startBtn.style.display = participants.length >= 3 ? 'block' : 'none';
-            }
-        }
-
-        function removeName(idx) {
-            participants.splice(idx, 1);
-            updateNameList();
-        }
-
-        function startPicking() {
-            if (participants.length < 3) {
-                alert('Need at least 3 participants!');
-                return;
-            }
-
-            // Create pairs (each person gets someone)
-            let available = [...participants];
-            shuffledPairs = [];
-
-            for (let i = 0; i < participants.length; i++) {
-                let giver = participants[i];
-                let possibleReceivers = available.filter(name => name !== giver);
-                
-                // If last person would get themselves, swap with previous
-                if (possibleReceivers.length === 1 && possibleReceivers[0] === giver) {
-                    const lastPair = shuffledPairs[shuffledPairs.length - 1];
-                    possibleReceivers = [lastPair.receiver];
-                    shuffledPairs[shuffledPairs.length - 1].receiver = giver;
-                }
-                
-                const receiver = possibleReceivers[Math.floor(Math.random() * possibleReceivers.length)];
-                shuffledPairs.push({ giver, receiver });
-                available = available.filter(name => name !== receiver);
-            }
-
-            // Shuffle the order of picking
-            shuffledPairs.sort(() => Math.random() - 0.5);
-            
-            showStep('step2');
-            updateProgress();
-        }
-
-        function validateParticipant() {
-            const input = document.getElementById('participantName');
-            const name = input.value.trim().toUpperCase();
-            const errorMsg = document.getElementById('errorMsg');
-            
-            const pair = shuffledPairs.find(p => p.giver === name && !p.revealed);
-            
-            if (!pair) {
-                errorMsg.textContent = 'Name not found or you already picked!';
-                return;
-            }
-            
-            currentParticipant = name;
-            pair.currentlyPicking = true;
-            input.value = '';
-            errorMsg.textContent = '';
-            showNumberSelection();
-        }
-
-        function showNumberSelection() {
-            const pickerName = document.getElementById('pickerName');
-            const numberGrid = document.getElementById('numberGrid');
-            
-            pickerName.textContent = `Hello, ${currentParticipant}!`;
-            
-            // Show all numbers, but disable the ones that would give them themselves
-            numberGrid.innerHTML = '';
-            for (let i = 0; i < shuffledPairs.length; i++) {
-                const pair = shuffledPairs[i];
-                if (pair.revealed) continue;
-                
-                const btn = document.createElement('button');
-                btn.className = 'number-btn';
-                btn.textContent = i + 1;
-                
-                if (pair.giver === currentParticipant) {
-                    btn.disabled = false;
-                    btn.onclick = () => revealPick(i);
-                } else {
-                    btn.disabled = true;
-                }
-                
-                numberGrid.appendChild(btn);
-            }
-            
-            showStep('step3');
-        }
-
-        function revealPick(index) {
-            const pair = shuffledPairs[index];
-            pair.revealed = true;
-            currentIndex++;
-            
-            document.getElementById('result').textContent = `🎁 Your Christmas friend is: ${pair.receiver}`;
-            showStep('step4');
-            updateProgress();
-        }
-
-        function nextParticipant() {
-            if (currentIndex >= participants.length) {
-                showStep('step5');
-            } else {
-                showStep('step2');
-            }
-        }
-
-        function updateProgress() {
-            const progress = (currentIndex / participants.length) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
-
-        function showStep(stepId) {
-            document.querySelectorAll('.step').forEach(step => {
-                step.classList.remove('active');
-            });
-            document.getElementById(stepId).classList.add('active');
-        }
+        ReactDOM.render(<XmasFriendPicker />, document.getElementById('root'));
     </script>
 </body>
 </html>
