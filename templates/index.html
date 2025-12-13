@@ -3,27 +3,458 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Santa</title>
+    <title>🎄 Xmas Friend Picker (Encrypted) 🎄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .names-list {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .name-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 5px;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            padding: 10px;
+            background: #ffe0e0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            color: #27ae60;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e0ffe0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #1976d2;
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .number-btn {
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .number-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .progress {
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <h1>Secret Santa Participant List</h1>
-    <form method="POST">
-        <label for="name">Enter your name:</label>
-        <input type="text" id="name" name="name" required>
-        <button type="submit">Add Name</button>
-    </form>
+    <div class="container">
+        <h1>🎄 Xmas Friend Picker 🎄</h1>
 
-    <h2>Participants:</h2>
-    <ul>
-        {% for participant in participants %}
-            <li>{{ participant }}</li>
-        {% endfor %}
-    </ul>
-    <br>
-    {% if participants|length > 1 %}
-        <a href="{{ url_for('shuffle') }}">Shuffle Names & Assign Secret Santa</a>
-    {% else %}
-        <p>Not enough participants to shuffle.</p>
-    {% endif %}
+        <!-- Step 1: Setup -->
+        <div id="step1" class="step active">
+            <div class="input-group">
+                <label>Enter participant name:</label>
+                <input type="text" id="nameInput" placeholder="Enter name">
+                <button onclick="addName()" style="margin-top: 10px;">Add Participant</button>
+            </div>
+
+            <div id="namesList" class="names-list" style="display: none;"></div>
+
+            <button onclick="startGame()" id="startBtn" style="margin-top: 20px;" disabled>
+                Start Secret Santa
+            </button>
+
+            <div id="error1" class="error"></div>
+        </div>
+
+        <!-- Step 2: Participant Login -->
+        <div id="step2" class="step">
+            <div class="progress">
+                <strong>Progress: <span id="progress">0/0</span></strong>
+            </div>
+
+            <div class="info-box">
+                Each participant should enter their name privately to reveal their available numbers.
+            </div>
+
+            <div class="input-group">
+                <label>Enter your name:</label>
+                <input type="text" id="participantInput" placeholder="Your name">
+                <button onclick="verifyParticipant()" style="margin-top: 10px;">
+                    Continue
+                </button>
+            </div>
+
+            <div id="error2" class="error"></div>
+        </div>
+
+        <!-- Step 3: Pick Number -->
+        <div id="step3" class="step">
+            <div class="info-box">
+                <strong id="currentParticipant"></strong>, choose a number:
+            </div>
+
+            <div id="numberGrid" class="number-grid"></div>
+
+            <div id="error3" class="error"></div>
+        </div>
+
+        <!-- Step 4: Reveal -->
+        <div id="step4" class="step">
+            <div class="result-box">
+                🎁 Your Xmas friend is:<br>
+                <span id="pickedName" style="font-size: 1.2em; margin-top: 10px; display: block;"></span>
+            </div>
+
+            <button onclick="nextParticipant()">
+                Hide Screen for Next Participant
+            </button>
+        </div>
+
+        <!-- Step 5: Complete -->
+        <div id="step5" class="step">
+            <div class="success">
+                <h2>🎉 All participants have picked! 🎉</h2>
+                <p style="margin-top: 15px;">The Secret Santa is complete!</p>
+            </div>
+
+            <button onclick="resetGame()" style="margin-top: 20px;">
+                Start New Game
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let names = [];
+        let currentParticipant = '';
+
+        function addName() {
+            const input = document.getElementById('nameInput');
+            const name = input.value.trim().toUpperCase();
+            
+            if (!name) {
+                showError('error1', 'Please enter a name');
+                return;
+            }
+
+            if (names.includes(name)) {
+                showError('error1', 'Name already exists!');
+                return;
+            }
+
+            names.push(name);
+            input.value = '';
+            updateNamesList();
+            hideError('error1');
+        }
+
+        function updateNamesList() {
+            const list = document.getElementById('namesList');
+            
+            if (names.length === 0) {
+                list.style.display = 'none';
+                document.getElementById('startBtn').disabled = true;
+                return;
+            }
+
+            list.style.display = 'block';
+            list.innerHTML = names.map((name, idx) => `
+                <div class="name-item">
+                    <span>${name}</span>
+                    <button class="remove-btn" onclick="removeName(${idx})">Remove</button>
+                </div>
+            `).join('');
+
+            document.getElementById('startBtn').disabled = names.length < 2;
+        }
+
+        function removeName(idx) {
+            names.splice(idx, 1);
+            updateNamesList();
+        }
+
+        async function startGame() {
+            if (names.length < 2) {
+                showError('error1', 'Need at least 2 participants');
+                return;
+            }
+
+            try {
+                const response = await fetch('/initialize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ names })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showError('error1', data.error);
+                    return;
+                }
+
+                document.getElementById('progress').textContent = `0/${data.total_participants}`;
+                showStep('step2');
+            } catch (error) {
+                showError('error1', 'Error starting game: ' + error.message);
+            }
+        }
+
+        async function verifyParticipant() {
+            const input = document.getElementById('participantInput');
+            const participant = input.value.trim().toUpperCase();
+
+            if (!participant) {
+                showError('error2', 'Please enter your name');
+                return;
+            }
+
+            try {
+                const response = await fetch('/get_available', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ participant })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showError('error2', data.error);
+                    return;
+                }
+
+                currentParticipant = data.participant;
+                document.getElementById('currentParticipant').textContent = data.participant;
+                
+                const grid = document.getElementById('numberGrid');
+                grid.innerHTML = data.available_numbers.map(num => 
+                    `<button class="number-btn" onclick="pickNumber(${num})">${num}</button>`
+                ).join('');
+
+                input.value = '';
+                hideError('error2');
+                showStep('step3');
+            } catch (error) {
+                showError('error2', 'Error: ' + error.message);
+            }
+        }
+
+        async function pickNumber(choice) {
+            try {
+                const response = await fetch('/pick', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        participant: currentParticipant,
+                        choice 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showError('error3', data.error);
+                    return;
+                }
+
+                document.getElementById('pickedName').textContent = data.picked_name;
+                document.getElementById('progress').textContent = `${data.picked_count}/${data.total}`;
+
+                if (data.is_complete) {
+                    showStep('step5');
+                } else {
+                    showStep('step4');
+                }
+            } catch (error) {
+                showError('error3', 'Error: ' + error.message);
+            }
+        }
+
+        function nextParticipant() {
+            showStep('step2');
+        }
+
+        async function resetGame() {
+            await fetch('/reset', { method: 'POST' });
+            names = [];
+            currentParticipant = '';
+            document.getElementById('nameInput').value = '';
+            updateNamesList();
+            showStep('step1');
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function showError(id, message) {
+            const el = document.getElementById(id);
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        function hideError(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Allow Enter key to add names
+        document.getElementById('nameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addName();
+        });
+
+        document.getElementById('participantInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyParticipant();
+        });
+    </script>
 </body>
 </html>
