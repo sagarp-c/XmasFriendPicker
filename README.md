@@ -1,7 +1,3 @@
-Here is a **much simpler, cleaner, and more human README**, easy for anyone to understand (even non-technical friends). You can directly use this 👇
-
----
-
 # 🎄 Xmas Friend Picker
 
 This is a simple **Python program** inspired by a real-life Christmas tradition. During Xmas, friends usually write their names on papers, shuffle them, and secretly pick one name. The picked friend stays **secret** until the day of gift giving.
