@@ -62,7 +62,20 @@ Just like folded papers hide names in real life, encryption hides names inside t
 * The process stays fair and secret
 
 ---
+🤝 Contributions
 
+Contributions are welcome!
+If you have ideas to improve the logic, UI, security, or add new features, feel free to:
+
+Open an issue
+
+Submit a pull request
+
+Suggest enhancements
+
+This project is open for learning and collaboration.
+
+---
 ## 🎉 Final Note
 
 This project is made for fun and learning, while keeping the Christmas spirit alive through code.
