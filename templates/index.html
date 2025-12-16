@@ -408,7 +408,9 @@
                 document.getElementById('progress').textContent = `${data.picked_count}/${data.total}`;
 
                 if (data.is_complete) {
-                    showStep('step5');
+                    setTimeout(() => {
+                    showStep('step5'); // After showing the picked name, move to step 5
+                  }, 1000);
                 } else {
                     showStep('step4');
                 }
